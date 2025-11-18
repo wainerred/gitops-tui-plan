@@ -161,12 +161,12 @@
                         <button class="arch-button" data-key="gitops">2. GitOps Operator: Argo CD / Flux</button>
                         <button class="arch-button" data-key="iac">3. IaC Tool: Ansible</button>
                         <button class="arch-button" data-key="ingress">4. Ingress: Traefik</button>
-                        <button class="arch-button" data-key="monitoring">5. Monitoring: Prometheus/Grafana</button>
+                        <button class="arch-button arch-button-active" data-key="monitoring">5. Observability Stack</button>
                     </div>
                     <!-- Блок Описания -->
                     <div id="arch-description" class="card-tui bg-gray-900 border border-cyan-400 min-h-[200px] shadow-inner shadow-black/80">
-                        <h4 class="text-xl font-extrabold text-cyan-400 mb-2">Нажмите на компонент</h4>
-                        <p class="text-gray-400">Здесь появится подробное описание роли выбранного инструмента. (TUI Log)</p>
+                        <h4 class="text-xl font-extrabold text-cyan-400 mb-2">5. Observability: Prometheus/Grafana + ELK</h4>
+                        <p class="text-gray-400">Расширение мониторинга до полной наблюдаемости. Prometheus/Grafana для метрик. **ELK Stack (Elasticsearch, Filebeat, Kibana)** - для централизованного сбора, индексирования и анализа всех логов (как K3s, так и хостов). Это устраняет необходимость ручного SSH-доступа для поиска логов.</p>
                     </div>
                 </div>
 
@@ -233,8 +233,8 @@
                                 <p class="text-xs text-cyan-400">Ingress / Routing</p>
                             </div>
                             <div class="p-3 bg-gray-800 rounded-sm shadow-md border border-gray-700 text-center">
-                                <p class="font-bold text-white">P/G Stack</p>
-                                <p class="text-xs text-cyan-400">Monitoring / Metrics</p>
+                                <p class="font-bold text-white">Observability Stack</p>
+                                <p class="text-xs text-cyan-400">P/G + **ELK**</p>
                             </div>
                         </div>
                     </div>
@@ -276,8 +276,9 @@
                         <ul class="list-disc list-inside space-y-3 text-gray-300 ml-4">
                             <li><strong class="text-cyan-400">1.1. Репозиторий IaC:</strong> Инициализация `infra-ansible`.</li>
                             <li><strong class="text-cyan-400">1.2. Внедрение Мониторинга:</strong> Развертывание Prometheus/Grafana.</li>
-                            <li><strong class="text-cyan-400">1.3. Ansible-Плейбук Безопасности:</strong> **Критично!** Блокировка SSH `root` по паролю, внедрение доступа по ключам.</li>
-                            <li><strong class="text-cyan-400">1.4. Оценка Ресурсов:</strong> Анализ метрик для определения `requests` и `limits`.</li>
+                            <li><strong class="text-cyan-400">1.3. Внедрение ELK (Initial):</strong> Установка Filebeat на хостах для сбора системных логов и логов Ansible. <span class="text-red-400 font-bold">(Критично для замены ручного сбора)</span></li>
+                            <li><strong class="text-cyan-400">1.4. Ansible-Плейбук Безопасности:</strong> **Критично!** Блокировка SSH `root` по паролю, внедрение доступа по ключам.</li>
+                            <li><strong class="text-cyan-400">1.5. Оценка Ресурсов:</strong> Анализ метрик для определения `requests` и `limits`.</li>
                         </ul>
                     </div>
                     <!-- Фаза II -->
@@ -289,7 +290,8 @@
                             <li><strong class="text-cyan-400">2.2. Установка Traefik:</strong> Развертывание Traefik как центрального Ingress-контроллера.</li>
                             <li><strong class="text-cyan-400">2.3. Репозиторий Манифестов:</strong> Инициализация `app-manifests`.</li>
                             <li><strong class="text-cyan-400">2.4. Развертывание GitOps-Оператора:</strong> Установка Argo CD/Flux.</li>
-                            <li><strong class="text-cyan-400">2.5. Настройка Аутентификации:</strong> Интеграция оператора с GitLab.</li>
+                            <li><strong class="text-cyan-400">2.5. Настройка Полной Наблюдаемости:</strong> Развертывание стека ELK внутри K3s для сбора логов контейнеров.</li>
+                            <li><strong class="text-cyan-400">2.6. Настройка Аутентификации:</strong> Интеграция оператора с GitLab.</li>
                         </ul>
                     </div>
                     <!-- Фаза III -->
@@ -348,7 +350,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-400"><span class="font-semibold text-cyan-400">Фаза III:</span> Инкрементальная миграция.</td>
                             </tr>
                             <tr>
-                                <td class="px-4 py-3 text-sm font-medium text-white">Недостаток знаний K8s</td>
+                                <td class="px-4 py-3 text-sm font-medium text-white">Недостаток знаний K8s/ELK</td>
                                 <td class="px-4 py-3 text-sm text-gray-400"><span class="font-semibold text-cyan-400">Обучение:</span> Внутренние семинары, документация.</td>
                             </tr>
                         </tbody>
@@ -361,7 +363,7 @@
 
     <footer class="bg-gray-900 border-t border-cyan-800/50 mt-20">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
-            TUI-Plan V2.1 | Внедрение GitOps и Модернизация Инфраструктуры
+            TUI-Plan V2.2 | Внедрение GitOps, Observability (ELK) и Модернизация Инфраструктуры
         </div>
     </footer>
 
@@ -438,10 +440,14 @@
                     desc: 'Централизованный Ingress-контроллер, который заменит Nginx/HAProxy. Управляется декларативно через K8s-манифесты, позволяя легко настраивать сложные правила маршрутизации и тестирование Blue/Green развертываний.'
                 },
                 'monitoring': {
-                    title: '5. Monitoring: Prometheus/Grafana',
-                    desc: 'Критически важный компонент для прозрачности. Собирает метрики, обеспечивая данные для точного определения лимитов ресурсов (requests/limits) для всех контейнеров в K3s.'
+                    title: '5. Observability: Prometheus/Grafana + ELK',
+                    desc: 'Расширение мониторинга до полной наблюдаемости. Prometheus/Grafana для метрик. **ELK Stack (Elasticsearch, Filebeat, Kibana)** - для централизованного сбора, индексирования и анализа всех логов (как K3s, так и хостов). Это устраняет необходимость ручного SSH-доступа для поиска логов.'
                 }
             };
+
+            // Инициализация активной кнопки, чтобы избежать пустой секции при старте
+            const defaultKey = 'monitoring'; 
+            updateArchDescription(defaultKey);
 
             function updateArchDescription(key) {
                 const data = archData[key];
@@ -465,15 +471,13 @@
                 }
             }
 
-            // Добавляем обработчики кликов и инициализируем
+            // Добавляем обработчики кликов 
             if (archButtons.length > 0) {
                 archButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         updateArchDescription(button.dataset.key);
                     });
                 });
-                // Инициализация. K3s активна по умолчанию
-                updateArchDescription('k3s'); 
             }
 
 
